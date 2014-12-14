@@ -1,0 +1,261 @@
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
+using namespace std;
+
+struct telement{
+	int ai,bi,ci,di,ei;
+    string prez_ime;
+    short dan,mj,god;
+    char spol;
+};
+
+#include "pokazivaci.h"
+//#include "polje.h"
+
+telement* n_cetvorki(int n){
+	telement* elementi = new telement[n];
+    srand(time(0));
+    rand();
+	telement k;      
+	int i=0;
+	while(i < n)
+	{
+		elementi[i].ai = rand()%491 + 10;
+		elementi[i].bi = rand()%721 + 80;
+		elementi[i].ci = rand()%5 + 1;
+		elementi[i].di = rand()%5 + 1;
+		i++;
+	}
+	i = 0;		
+	cout<<endl;
+	
+	while(i < n)
+	{
+		cout << "Klijent " << 1+1 << ": ";
+		cout << "ai: " << elementi[i].ai << " bi: " << elementi[i].bi << " ci: " << elementi[i].ci << " di: " << elementi[i].di << endl;
+		
+		i++;
+	}
+	
+	return elementi;
+}
+
+void poredak_prioriteta(que *Q){
+    telement elem;
+    que* pomocni1 = InitQ(pomocni1), * pomocni2 = InitQ(pomocni2);
+	
+    for(int i=1; i <= 4; i++)
+	{
+        while(!IsEmptyQ(Q))
+		{
+            elem = FrontQ(Q);
+            DeQueueQ(Q);
+            
+            if(elem.ci == i) 
+				EnQueueQ(elem,pomocni1);            
+			else 
+				EnQueueQ(elem, pomocni2);
+        }
+        while(!IsEmptyQ(pomocni2))
+		{
+            elem = FrontQ(pomocni2);
+            DeQueueQ(pomocni2);
+            EnQueueQ(elem, Q);
+    	}
+    }
+    while(!IsEmptyQ(pomocni1))
+	{
+        elem = FrontQ(pomocni1);
+        DeQueueQ(pomocni1);
+        EnQueueQ(elem, Q);
+    }
+}
+
+void unos(que *Q, int n, telement* temp_klijenti){   
+    telement k;
+    int d,mjesec, godina, starost;
+    char sp;
+    int provjera = 1, i = 0, j = 0;
+      bool jarac = false;
+      bool istinost=false;
+	
+	for (i=0; i < n; i++)
+	{	
+		for(j = 0; j < 1; j++)
+		{
+			k.ai = temp_klijenti[i].ai;
+			k.bi = temp_klijenti[i].bi;
+			k.ci = temp_klijenti[i].ci;
+			k.di = temp_klijenti[i].di;
+			cout<<"Ime i prezime: ";
+			cin.ignore();
+			getline(cin, k.prez_ime);
+			
+			cout<< "Datum rodjenja: ";
+			do{
+				cout<<endl<<"Dan: "; cin>>d;
+			}while(d <0 || d > 31);
+			do{
+				cout<<"Mjesec: "; cin>>mjesec;
+			}while(mjesec <0 || mjesec > 12);
+			do{
+				cout<<"Godina: "; cin>>godina;
+			}while(godina <1910 || godina > 2015);
+			
+			cout<<"Unesite spol osobe: ";    
+			do{
+				cin>>sp;
+				if(sp == 'm' && k.ci == 3)
+				{
+					provjera = 1;
+					cout<<"Nepravilan unos, stisnite d za ponovniti: ";
+				}
+				else provjera=0;     
+			}while(provjera); //sad radi
+			
+			k.dan = d;
+			k.mj = mjesec;
+			k.god = godina;			
+			k.spol = sp;
+			EnQueueQ(k, Q);
+			cout << endl;
+		}
+	}//for
+	
+	poredak_prioriteta(Q); //Sortiranje prema najvecem prioritetu
+	
+	telement ka;  
+	que *pom = InitQ(pom);
+	while(IsEmptyQ(Q) == false){
+		ka=FrontQ(Q);
+		DeQueueQ(Q);
+		EnQueueQ(ka,pom);
+	}
+	cout<<"Ispis svih klijenata koji imaju manje od 40 godina i jarci su :"<<endl<<endl;
+	while(IsEmptyQ(pom) == false){
+		ka = FrontQ(pom);
+		DeQueueQ(pom);			
+		  
+		starost = 2014 - ka.god;
+		if((ka.dan >= 22 && ka.mj == 12) || (ka.dan <= 20 && ka.mj == 1)) jarac = true;
+		else jarac = false;          
+		if(starost < 40 && ka.di == 3 && jarac){
+                   istinost=true;
+			cout << "Ime i prezime: " << ka.prez_ime << endl;
+			cout << "Datum / mjesec /godina rodenja: " << ka.dan << "." <<  ka.mj << "." << ka.god << "." << endl;
+			cout << "Spol osobe: " << ka.spol << endl;
+			cout << "------------" << endl;
+		}
+		EnQueueQ(ka, Q);
+	}
+	if(!istinost) cout<<"Nema takvih osoba!"<<endl;
+}
+
+ void ispis(que *Q){
+    telement klijent[10000];
+    int br=0;
+    if(IsEmptyQ(Q)) cout<<"Ne postoji red"<<endl;
+    while(!IsEmptyQ(Q)){
+                         klijent[br]=FrontQ(Q);
+                         cout<<"Dosao "<<klijent[br].ai<<" Vremenska razlika"<<endl;
+                         cout<<"Posluživanje je trajalo: "<<klijent[br].bi<<endl;
+                         cout<<"Ime i prezime: "<<klijent[br].prez_ime<<endl;
+                         cout<<"Datum rodenja: "<<klijent[br].dan<<"./"<<klijent[br].mj<<"/"<<klijent[br].god<<endl;
+                         cout<<"Spol: ";
+                         if(klijent[br].spol) cout<<"musko"<<endl;
+                         else cout<<"zensko"<<endl;
+                         br++;
+                         DeQueueQ(Q);
+                         cout<<"_____________________________"<<endl;                    
+     } 
+     for(int i=0; i<br; i++)   EnQueueQ(klijent[i],Q);    
+}
+void trudnica_van(que* Q){
+	telement trudnica;
+	bool da = false;
+	que* pom = InitQ(pom);
+while(!IsEmptyQ(Q)){
+		trudnica = FrontQ(Q);
+		EnQueueQ(trudnica, pom);
+		DeQueueQ(Q);
+}
+	cout<<"Ispis trudnica koje su trazile uslugu EVOtv te su izasle zbog prevelikog cekanja!"<<endl;
+	while(!IsEmptyQ(pom)){
+		trudnica = FrontQ(pom);
+		DeQueueQ(pom);
+if(trudnica.ci == 3 && trudnica.bi >= 600 && trudnica.di == 5){
+da = true;	
+			cout << "\tIme i prezime: " << trudnica.prez_ime;
+			cout << "\tSpol: " << trudnica.spol ;
+			cout << "\tDatum rodenja: " << trudnica.dan << "/" << trudnica.mj << "/" << trudnica.god ;
+			cout << "\tVJ cekanja trudnice: " << trudnica.ai;
+		    cout<<endl;
+            cout<<endl;
+		}
+		else EnQueueQ(trudnica,Q);
+	}
+	cout<<endl<<endl;
+	if(!da) 
+		cout << "Nema takvih osoba." <<endl;
+	cout<<endl<<endl;
+	cout << "Ispis preostalih osoba: " << endl;
+	while(!IsEmptyQ(Q)){
+		trudnica = FrontQ(Q);
+		DeQueueQ(Q);
+		EnQueueQ(trudnica, pom);
+	}
+	while(!IsEmptyQ(pom)){
+		trudnica = FrontQ(pom);
+						
+		cout << "Ime i prezime: " << trudnica.prez_ime << endl;
+		cout << "Spol: " << trudnica.spol << endl;
+		cout << "Datum rodenja: " << trudnica.dan << "/" << trudnica.mj << "." << trudnica.god <<endl;
+		DeQueueQ(pom);
+		EnQueueQ(trudnica, Q);
+	}
+}
+ 
+int main(){
+	int n;
+	bool kreiran = false;
+	telement* temp_klijenti;
+	que *Q = InitQ(Q);
+	
+	int izbor;
+	do{
+		cout<<endl;
+		cout<<"IZBORNIK"<<endl;
+		cout<<"1. Generiranje cetvorki!"<<endl;
+		cout<<"2. Upis u  glavni red!"<<endl;
+		cout<<"3. Izlaz trudnica!"<<endl;
+		cout<<"9. Izlaz iz programa"<<endl;
+		cout<<"Izbor: ";
+		cin>>izbor;
+		cout<<endl<<endl;
+		
+		switch(izbor)
+		{			 
+			case 1: 
+				cout<<"Koliko n cetvroki zelite generirati: ";
+				cin>>n;
+				temp_klijenti = n_cetvorki(n);
+				kreiran = true;
+				break;
+			case 2:
+				unos(Q,n, temp_klijenti); 
+				break;
+				case 3: 
+                        trudnica_van(Q);
+                        break;
+			case 9:
+				break;
+			default: 
+				break; 
+		}
+	}while(izbor !=9);
+
+	if(!kreiran)
+		delete [] temp_klijenti;
+}
